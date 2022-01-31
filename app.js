@@ -56,5 +56,5 @@ function writeToFile(fileName, data) {
                 writeToFile('./dist/index.html',renderHTML() )
             })
     }
-    init();
 
+    writeToFile('./dist/index.html',renderHTML());
