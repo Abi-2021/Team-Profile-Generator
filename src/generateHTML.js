@@ -1,52 +1,63 @@
-const Manager = require('../lib/Manager');
-const Intern = require('../lib/Intern');
-const  Engineer = require('../lib/Engineer');
-
 // function to display manager's card
 function renderManagerCard(manager) {
-    return `<div class="card p-3 h-100">
-        <div class="card-body bg-primary text-white">
-            <h5 class="card-title">${manager.getName()}</h5>
-            <h5 class="card-title"><i class="fas fa-coffee me-2"></i>${manager.getRole()}</h5>
+    return `<div class="card p-1 my-5">
+        <div class="card-body">
+            <div class="card-title bg-primary text-white p-3">
+                <h5>${manager.getName()}</h5>
+                <h6><i class="fas fa-coffee me-2"></i>${manager.getRole()}</h6>
+            </div
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">ID: ${manager.getId()}</li>
+                <li class="list-group-item">Email: <a href="mailto:${manager.getEmail()}">${manager.getEmail()}</a></li>
+                <li class="list-group-item">Office number: ${manager.getOfficeNumber()}</li>
+            </ul>
         </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">ID: ${manager.getId()}</li>
-            <li class="list-group-item">Email: <a href="mailto:${manager.getEmail()}">${manager.getEmail()}</a></li>
-            <li class="list-group-item">Office number: ${manager.getOfficeNumber()}</li>
-        </ul>
     </div>`
 }
 
 function renderEngineerCard(engineer) {
-    return `<div class="card p-3 h-100">
-        <div class="card-body bg-primary text-white">
-            <h5 class="card-title">${engineer.getName()}</h5>
-            <h5 class="card-title"><i class="fas fa-laptop me-2"></i>${engineer.getRole()}</h5>
+    return `<div class="card p-1 my-5">
+        <div class="card-body">
+            <div class="card-title bg-primary text-white p-3">
+                <h5>${engineer.getName()}</h5>
+                <h6><i class="fas fa-laptop me-2"></i>${engineer.getRole()}</h6>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">ID: ${engineer.getId()}</li>
+                <li class="list-group-item">Email: <a href="mailto:${engineer.getEmail()}">${engineer.getEmail()}</a></li>
+                <li class="list-group-item">GitHub: <a href="https://github.com/${engineer.getGithub()}" target="_blank">${engineer.getGithub()}</a></li>
+            </ul>
         </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">ID: ${engineer.getId()}</li>
-            <li class="list-group-item">Email: <a href="mailto:${engineer.getEmail()}">${engineer.getEmail()}</a></li>
-            <li class="list-group-item">GitHub: <a href="https://github.com/"${engineer.getGithub()} target="_blank">${engineer.getGithub()}</a></li>
-        </ul>
     </div>`
 }
 
 function renderInternCard(intern) {
-    return `<div class="card p-3 h-100">
-        <div class="card-body bg-primary text-white">
-            <h5 class="card-title">${intern.getName()}</h5>
-            <h5 class="card-title"><i class="fas fa-users me-2"></i>${intern.getRole()}</h5>
+    return `<div class="card p-1 my-5">
+        <div class="card-body">
+            <div class="card-title bg-primary text-white p-3">
+                <h5>${intern.getName()}</h5>
+                <h6><i class="fas fa-users me-2"></i>${intern.getRole()}</h6>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">ID: ${intern.getId()}</li>
+                <li class="list-group-item">Email: <a href="mailto:${intern.getEmail()}">${intern.getEmail()}</a></li>
+                <li class="list-group-item">School: ${intern.getSchool()}</li>
+            </ul>
         </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">ID: ${intern.getId()}</li>
-            <li class="list-group-item">Email: <a href="mailto:${intern.getEmail()}">${intern.getEmail()}</a></li>
-            <li class="list-group-item">School: ${intern.getSchool()}</li>
-        </ul>
     </div>`
 }
 
-
-function renderHTML(teamData) {
+function renderHTML(team) {
+    const managerPortion = renderManagerCard(team);
+    const {engineers, interns} = team;
+    let engineersPortion = '';
+    for (let i = 0; engineers !== undefined && i < engineers.length; i++) {
+        engineersPortion += renderEngineerCard(engineers[i]);
+    }
+    let internPortion = '';
+    for (let i = 0; interns !== undefined && i < interns.length; i++) {
+        internPortion += renderInternCard(interns[i]);
+    }
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,10 +74,10 @@ function renderHTML(teamData) {
 <header class="bg-danger p-5 text-center">
     <h1 class="text-white">Team Profile Generator</h1>
 </header>
-<section class="container-fluid bg-light d-flex justify-content-center gap-5 flex-wrap my-5">
-    ${renderManagerCard(new Manager('01', 'Manager', 'email', '898989'))}
-    ${renderInternCard(new Intern('43','Intern', 'email', 'school'))}
-    ${renderEngineerCard(new Engineer('05','Engineer', 'email', '6576'))}
+<section class="container-fluid bg-light d-flex justify-content-center gap-5 flex-wrap">
+    ${managerPortion}
+    ${engineersPortion}
+    ${internPortion}
 </section>
 </body>
 </html>`

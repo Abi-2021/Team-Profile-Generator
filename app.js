@@ -2,9 +2,14 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 const renderHTML = require('./src/generateHTML')
 
+const Manager = require('./lib/Manager')
+const Engineer = require('./lib/Engineer')
+const Intern = require('./lib/intern')
+const optionChoices = ['Add an Engineer', 'Add an Intern', 'Finish building my team']
 
-function inputValidator(input,description) {
-    if(!input) {
+
+function inputValidator(input, description) {
+    if (!input) {
         console.log(description)
         return false;
     }
@@ -12,49 +17,151 @@ function inputValidator(input,description) {
 }
 
 // create an array of questions for team manager
-const managerQues = [
+const managerPromptQuestions = [
     {
-        type : 'input',
-        name : 'teamManagerName',
-        message : 'What is the name of the team manager?',
-        validate : teamManagerName => inputValidator(teamManagerName, 'Please enter the name.')
-    },
-    {
-        type : 'input',
-        name : 'employeeID',
-        message: 'Please enter the employee ID.',
-        validate : employeeID => inputValidator(employeeID, 'Please enter a employee ID.' )
+        type: 'input',
+        name: 'mName',
+        message: 'Manager\'s name:',
+        validate: (name) => inputValidator(name)
     },
     {
         type: 'input',
-        name: 'email',
-        message: 'Please enter the email address.',
-        validate : email => inputValidator(email, 'Please enter a valid email address.')
+        name: 'mEmpId',
+        message: 'Manager\'s employee id:',
+        validate: (id) => inputValidator(id)
     },
     {
         type: 'input',
-        name: 'officeNum',
-        message: 'Please enter office number.',
-        validate : officeNum => inputValidator(officeNum, 'Please enter the office number.')
-    }
+        name: 'mEmail',
+        message: 'Manager\'s email:',
+        validate: (email) => inputValidator(email)
+    },
+    {
+        type: 'input',
+        name: 'mOfficeNumber',
+        message: 'Manager\'s office number:',
+        validate: (phone) => inputValidator(phone)
+    },
 ]
-// Create a function to generate HTML file
-function writeToFile(fileName, data) {
-    fs.writeFile(fileName,data,err => {
-        if(err) {
-            console.log(err);
-        }
-        console.log('HTML has been generated')
-    })
+
+
+const promptOptionQuestion = [
+    {
+        type: 'list',
+        name: 'choice',
+        message: 'What would you like to do?',
+        choices: optionChoices
+    },
+]
+
+const engineerPromptQuestions = [
+    {
+        type: 'input',
+        name: 'eName',
+        message: 'Engineer\'s name:',
+        validate: (name) => inputValidator(name)
+    },
+    {
+        type: 'input',
+        name: 'eEmpId',
+        message: 'Engineer\'s employee id:',
+        validate: (id) => inputValidator(id)
+    },
+    {
+        type: 'input',
+        name: 'eEmail',
+        message: 'Engineer\'s email:',
+        validate: (email) => inputValidator(email)
+    },
+    {
+        type: 'input',
+        name: 'eGithub',
+        message: 'Engineer\'s GitHub username:',
+        validate: (gitHub) => inputValidator(gitHub)
+    },
+]
+
+const internPromptQuestions = [
+    {
+        type: 'input',
+        name: 'iName',
+        message: 'Intern\'s name:',
+        validate: (name) => inputValidator(name)
+    },
+    {
+        type: 'input',
+        name: 'iEmpId',
+        message: 'Intern\'s employee id:',
+        validate: (id) => inputValidator(id)
+    },
+    {
+        type: 'input',
+        name: 'iEmail',
+        message: 'Intern\'s email:',
+        validate: (email) => inputValidator(email)
+    },
+    {
+        type: 'input',
+        name: 'iSchool',
+        message: 'Intern\'s school name:',
+        validate: (school) => inputValidator(school)
+    },
+]
+
+// Prompts
+const promptManager = () => {
+    return inquirer.prompt(managerPromptQuestions).then(managerDetails => {
+        const {mEmpId, mName, mEmail, mOfficeNumber} = managerDetails;
+        return new Manager(mEmpId, mName, mEmail, mOfficeNumber);
+    });
+};
+
+const promptOption = (team) => {
+    return inquirer.prompt(promptOptionQuestion).then(option => {
+        const {choice} = option;
+        if (choice === 'Add an Engineer')
+            return promptEngineer(team);
+        else if (choice === 'Add an Intern')
+            return promptInterns(team);
+        else if (choice === 'Finish building my team')
+            return team;
+        else throw new Error('Something went wrong!')
+    });
 }
 
-// Create a function to initialize the app
-    function init() {
-    inquirer.prompt(managerQues)
-            .then(answer => {
-                console.log(answer);
-                writeToFile('./dist/index.html',renderHTML() )
-            })
+const promptEngineer = (team) => {
+    if (!team.engineers) {
+        team.engineers = [];
     }
+    return inquirer.prompt(engineerPromptQuestions).then(currentEngineer => {
+        const {eEmpId, eName, eEmail, eGithub} = currentEngineer;
+        const engineer = new Engineer(eEmpId, eName, eEmail, eGithub);
+        team.engineers.push(engineer);
+        return promptOption(team)
+    });
+}
 
-    writeToFile('./dist/index.html',renderHTML());
+const promptInterns = (team) => {
+    if (!team.interns) {
+        team.interns = [];
+    }
+    return inquirer.prompt(internPromptQuestions).then(currentIntern => {
+        const {iEmpId, iName, iEmail, iSchool} = currentIntern;
+        const intern = new Intern(iEmpId, iName, iEmail, iSchool);
+        team.interns.push(intern);
+        return promptOption(team);
+    });
+}
+
+promptManager().then(promptOption).then(answer => {
+    fs.writeFile('dist/index.html', renderHTML(answer), (err => {
+        if (err) console.log('Error occurred during the writing process');
+        console.log('writing process successfully completed!');
+    }));
+});
+
+
+
+
+
+
